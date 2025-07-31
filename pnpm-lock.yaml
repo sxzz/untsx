@@ -38,9 +38,6 @@ importers:
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
-      unplugin:
-        specifier: ^2.3.5
-        version: 2.3.5
     devDependencies:
       '@babel/types':
         specifier: ^7.28.2
