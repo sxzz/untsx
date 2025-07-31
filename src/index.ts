@@ -66,7 +66,7 @@ export interface UntsxFactory<T = any> {
     index: number | null | undefined,
     isVolar: boolean,
   ) => boolean
-  format: Printer['print']
+  format?: Printer['print']
   getVisitorKeys?: Printer['getVisitorKeys']
 }
 

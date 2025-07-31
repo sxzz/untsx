@@ -133,25 +133,30 @@ export function createPrettierPlugin(
       'babel-ts': babelTsParser,
       typescript: typescriptParser,
     },
-    printers: {
-      estree: {
-        ...printers.estree,
-        print(path, ...args) {
-          if (isTarget(path.node)) {
-            return format(path, ...args)
-          }
-          return printers.estree.print(path, ...args)
-        },
+    printers:
+      format || getVisitorKeys
+        ? {
+            estree: {
+              ...printers.estree,
+              print: format
+                ? (path, ...args) => {
+                    if (isTarget(path.node)) {
+                      return format(path, ...args)
+                    }
+                    return printers.estree.print(path, ...args)
+                  }
+                : printers.estree.print,
 
-        getVisitorKeys: getVisitorKeys
-          ? (node, ...args) => {
-              if (isTarget(node)) {
-                return getVisitorKeys(node, ...args)
-              }
-              return printers.estree.getVisitorKeys(node, ...args)
-            }
-          : printers.estree.getVisitorKeys,
-      },
-    },
+              getVisitorKeys: getVisitorKeys
+                ? (node, ...args) => {
+                    if (isTarget(node)) {
+                      return getVisitorKeys(node, ...args)
+                    }
+                    return printers.estree.getVisitorKeys(node, ...args)
+                  }
+                : printers.estree.getVisitorKeys,
+            },
+          }
+        : undefined,
   }
 }
