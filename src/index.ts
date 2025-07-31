@@ -192,6 +192,13 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
       (code) => baseParse(code, hasPlugin('typescript'), hasPlugin('jsx')),
       (code, isExpression, offset) =>
         (isExpression ? babelParseExpression : babelParse)(code, {
+          allowAwaitOutsideFunction: isExpression,
+          allowImportExportEverywhere: isExpression,
+          allowNewTargetOutsideFunction: isExpression,
+          allowReturnOutsideFunction: isExpression,
+          allowSuperOutsideMethod: isExpression,
+          allowUndeclaredExports: isExpression,
+          allowYieldOutsideFunction: isExpression,
           ...options,
           startIndex: offset,
         }),
@@ -284,7 +291,7 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
         index: number | null | undefined,
       ) {
         if (factory.isTarget(node)) {
-          changed ||= factory.transform(
+          const _changed = factory.transform(
             code,
             id,
             s,
@@ -294,6 +301,7 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
             index,
             isVolar,
           )
+          changed ||= _changed
         }
       },
     })
