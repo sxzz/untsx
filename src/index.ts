@@ -41,7 +41,7 @@ export type CustomAcornParser = (
 export const REGEX_TS: RegExp = /\.[cm]?tsx?$/
 export const REGEX_JSX: RegExp = /\.[jt]sx$/
 
-export { createESLintParser, createPrettierPlugin }
+export { createESLintParser, createPrettierPlugin, replace }
 
 export interface UntsxFactory<T = any> {
   baseParser:

@@ -2,7 +2,7 @@
   "name": "untsx",
   "version": "0.0.0",
   "packageManager": "pnpm@10.13.1",
-  "description": "undefined",
+  "description": "Universal TypeScript extension for all popular toolchains.",
   "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/sxzz/untsx#readme",
