@@ -3,25 +3,26 @@ import { createTsMacroProgram } from '@sxzz/test-utils'
 import { ESLint } from 'eslint'
 import { MagicStringAST } from 'magic-string-ast'
 import { format } from 'prettier'
+import { tryOperatorPlugin } from 'tc39-try/acorn'
 import { createPlugin } from 'ts-macro'
 import { expect, test } from 'vitest'
-import { createUntsx, REGEX_TS } from '../src'
-import fixture from './fixtures/throw?url'
+import { createUntsx } from '../src'
+import fixture from './fixtures/try?url'
 
 const { acorn, babel, espree, eslintTypescript, transform, prettier, eslint } =
   createUntsx({
     baseParser: {
-      name: 'babel',
-      parserOptions: {
-        plugins: ['throwExpressions'],
+      name: 'acorn',
+      customParser(parser) {
+        return parser.extend(tryOperatorPlugin())
       },
     },
     isTarget: (node) =>
-      node.type === 'UnaryExpression' && node.operator === 'throw',
+      node.type === 'UnaryExpression' && node.operator === 'try',
     build(parserName, start, end, valid) {
       return {
         type: 'UnaryExpression',
-        operator: 'throw',
+        operator: 'try',
         prefix: true,
         argument: valid,
 
@@ -33,22 +34,18 @@ const { acorn, babel, espree, eslintTypescript, transform, prettier, eslint } =
     transform(code, id, s, node) {
       const argumentStart = node.argument.start
 
-      s.replaceRange(
-        node.start,
-        argumentStart,
-        `(function (e)${REGEX_TS.test(id) ? ': never' : ''} { throw e })(`,
-      )
+      s.replaceRange(node.start, argumentStart, `() => (`)
       s.replaceRange(node.argument.end, node.end, ')')
 
       return true
     },
     format(path, options, print) {
-      return ['throw ', path.call(print, 'argument')]
+      return ['try ', path.call(print, 'argument')]
     },
   })
 
-const code = 'const x = throw !1'
-const codeTS = 'const x: never = throw !1'
+const code = 'const x = try fn()'
+const codeTS = 'const x: any = try fn()'
 
 test('acorn', () => {
   const program = acorn(code, { ecmaVersion: 'latest' })
@@ -56,20 +53,17 @@ test('acorn', () => {
 
   expect(declaration.init).toMatchObject({
     type: 'UnaryExpression',
-    operator: 'throw',
+    operator: 'try',
     prefix: true,
     argument: {
-      type: 'UnaryExpression',
-      operator: '!',
-      prefix: true,
-      start: 16,
-      end: 18,
-      argument: {
-        type: 'Literal',
-        value: 1,
-        start: 17,
-        end: 18,
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'fn',
+        start: 14,
+        end: 16,
       },
+      arguments: [],
     },
     start: 10,
     end: 18,
@@ -82,20 +76,17 @@ test('babel', () => {
 
   expect(declaration.init).toMatchObject({
     type: 'UnaryExpression',
-    operator: 'throw',
+    operator: 'try',
     prefix: true,
     argument: {
-      type: 'UnaryExpression',
-      operator: '!',
-      prefix: true,
-      start: 16,
-      end: 18,
-      argument: {
-        type: 'NumericLiteral',
-        value: 1,
-        start: 17,
-        end: 18,
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'fn',
+        start: 14,
+        end: 16,
       },
+      arguments: [],
     },
     start: 10,
     end: 18,
@@ -110,43 +101,41 @@ test('babel with options', () => {
     type: 'Identifier',
     name: 'x',
     start: 6,
-    end: 14,
-    range: [6, 14],
+    end: 12,
+    range: [6, 12],
     typeAnnotation: {
       type: 'TSTypeAnnotation',
       typeAnnotation: {
-        type: 'TSNeverKeyword',
+        type: 'TSAnyKeyword',
         start: 9,
-        end: 14,
-        range: [9, 14],
+        end: 12,
+        range: [9, 12],
       },
       start: 7,
-      end: 14,
-      range: [7, 14],
+      end: 12,
+      range: [7, 12],
     },
   })
   expect(declaration.init).toMatchObject({
     type: 'UnaryExpression',
-    operator: 'throw',
+    operator: 'try',
     prefix: true,
     argument: {
-      type: 'UnaryExpression',
-      operator: '!',
-      prefix: true,
-      start: 23,
-      end: 25,
-      range: [23, 25],
-      argument: {
-        type: 'NumericLiteral',
-        value: 1,
-        start: 24,
-        end: 25,
-        range: [24, 25],
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'fn',
+        start: 19,
+        end: 21,
+        range: [19, 21],
       },
+      start: 19,
+      end: 23,
+      range: [19, 23],
     },
-    start: 17,
-    end: 25,
-    range: [17, 25],
+    start: 15,
+    end: 23,
+    range: [15, 23],
   })
 })
 
@@ -156,20 +145,17 @@ test('espree', () => {
 
   expect(declaration.init).toMatchObject({
     type: 'UnaryExpression',
-    operator: 'throw',
+    operator: 'try',
     prefix: true,
     argument: {
-      type: 'UnaryExpression',
-      operator: '!',
-      prefix: true,
-      start: 16,
-      end: 18,
-      argument: {
-        type: 'Literal',
-        value: 1,
-        start: 17,
-        end: 18,
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'fn',
+        start: 14,
+        end: 16,
       },
+      arguments: [],
     },
     start: 10,
     end: 18,
@@ -182,18 +168,16 @@ test('typescript-eslint', () => {
 
   expect(declaration.init).toMatchObject({
     type: 'UnaryExpression',
-    operator: 'throw',
+    operator: 'try',
     prefix: true,
     argument: {
-      type: 'UnaryExpression',
-      operator: '!',
-      prefix: true,
-      range: [16, 18],
-      argument: {
-        type: 'Literal',
-        value: 1,
-        range: [17, 18],
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'fn',
+        range: [14, 16],
       },
+      arguments: [],
     },
     range: [10, 18],
   })
@@ -202,13 +186,11 @@ test('typescript-eslint', () => {
 test('magic-string', () => {
   let s = new MagicStringAST(code)
   transform(s.toString(), 'test.js', s)
-  expect(s.toString()).toBe('const x = (function (e) { throw e })(!1)')
+  expect(s.toString()).toBe('const x = () => (fn())')
 
   s = new MagicStringAST(codeTS)
   transform(s.toString(), 'test.ts', s)
-  expect(s.toString()).toBe(
-    'const x: never = (function (e): never { throw e })(!1)',
-  )
+  expect(s.toString()).toBe('const x: any = () => (fn())')
 })
 
 test('volar', () => {
@@ -232,13 +214,13 @@ test.each(['acorn', 'babel', 'babel-ts', 'typescript'])(
   'prettier: parser %s',
   async (parser) => {
     const isTS = parser === 'babel-ts' || parser === 'typescript'
-    const code = isTS ? 'const  x:never  =  throw  1;' : 'const  x  =  throw 1;'
+    const code = isTS ? 'const  x:never  =  try  1;' : 'const  x  =  try 1;'
     const result = await format(code, {
       parser,
       plugins: [prettier],
       semi: false,
     })
-    const formatted = isTS ? 'const x: never = throw 1' : 'const x = throw 1'
+    const formatted = isTS ? 'const x: never = try 1' : 'const x = try 1'
     expect(result).toBe(`${formatted}\n`)
   },
 )

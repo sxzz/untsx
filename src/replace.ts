@@ -1,4 +1,5 @@
 import { walk } from 'estree-walker'
+import { getNodeRange } from './utils'
 import type { IsTargetFn } from '.'
 
 export type NodeInfo = [
@@ -9,12 +10,12 @@ export type NodeInfo = [
   validEnd: number,
 ]
 
-export type ParseFn = (src: string, isExpression: boolean) => any
+export type ParseFn = (
+  src: string,
+  isExpression: boolean,
+  offset?: number,
+) => any
 export type BuildFn = (start: number, end: number, valid: any) => any
-
-function getNodeRange(node: any): [start: number, end: number] {
-  return node.range || [node.start, node.end]
-}
 
 export function replace<T>(
   code: string,
@@ -66,7 +67,9 @@ export function replace<T>(
 
   let replaced = 0
   walk(finalAST as any, {
-    enter(node) {
+    enter(node, parent, key) {
+      if (key === 'tokens') return
+
       if (['File', 'Program', 'ExpressionStatement'].includes(node.type)) {
         return
       }
@@ -85,7 +88,7 @@ export function replace<T>(
 
   if (replaced !== sources.length) {
     throw new Error(
-      `Expected to replace ${sources.length} nodes, but replaced only ${replaced}.`,
+      `Expected to replace ${sources.length} nodes, but replaced ${replaced}.`,
     )
   }
 
@@ -108,13 +111,7 @@ export function replace<T>(
         throw new Error('Unsupported syntax')
       }
     } else {
-      const ast = parse(node[0], true)
-
-      ast.range = [validStart, validEnd]
-      ast.start = validStart
-      ast.end = validEnd
-
-      return ast
+      return parse(node[0], true, validStart)
     }
   }
 }

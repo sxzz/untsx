@@ -5,6 +5,10 @@ import {
   type ParseResult,
 } from '@babel/parser'
 import {
+  parseForESLint,
+  type ParserOptions as TSESParserOptions,
+} from '@typescript-eslint/parser'
+import {
   parse as tsEslintParse,
   type TSESTree,
   type TSESTreeOptions,
@@ -15,15 +19,19 @@ import {
   type Program as AcornProgram,
 } from 'acorn'
 import acornJsx from 'acorn-jsx'
-import acornTS from 'acorn-typescript'
+import { tsPlugin as acornTS } from 'acorn-typescript'
 import { parse as espreeParse, type Options as EspreeOptions } from 'espree'
 import { walk } from 'estree-walker'
+import { createESLintParser } from './eslint'
 import { createPrettierPlugin } from './prettier'
 import { replace } from './replace'
+import { patchLocOffset } from './utils'
 import type { File } from '@babel/types'
+import type { Linter } from 'eslint'
 import type { MagicStringAST } from 'magic-string-ast'
 import type { Plugin as PrettierPlugin, Printer } from 'prettier'
 import type { Codes } from 'ts-macro'
+import type { SourceFile } from 'typescript'
 
 export type IsTargetFn = (node: any) => boolean
 export type CustomAcornParser = (
@@ -32,6 +40,8 @@ export type CustomAcornParser = (
 
 export const REGEX_TS: RegExp = /\.[cm]?tsx?$/
 export const REGEX_JSX: RegExp = /\.[jt]sx$/
+
+export { createESLintParser, createPrettierPlugin }
 
 export interface UntsxFactory<T = any> {
   baseParser:
@@ -75,9 +85,14 @@ export interface UntsxInstance {
     code: string,
     options?: TSESTreeOptions,
   ) => TSESTree.Program
+  eslintTypescriptParser: (
+    src: string | SourceFile,
+    options?: TSESParserOptions | null,
+  ) => ReturnType<typeof parseForESLint>
 
   transform: (code: string, id: string, s: MagicStringAST | Codes) => boolean
   prettier: PrettierPlugin
+  eslint: { jsParser: Linter.Parser; tsParser: Linter.Parser }
 }
 
 export function createUntsx(factory: UntsxFactory): UntsxInstance {
@@ -144,9 +159,9 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
       code,
       'acorn',
       (code) => baseParse(code, isTS, isJSX),
-      (code, isExpression) =>
+      (code, isExpression, offset) =>
         isExpression
-          ? parser.parseExpressionAt(code, 0, options)
+          ? patchLocOffset(parser.parseExpressionAt(code, 0, options), offset)
           : parser.parse(code, options),
       factory.build.bind(null, 'acorn'),
       factory.isTarget,
@@ -175,8 +190,11 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
       code,
       'babel',
       (code) => baseParse(code, hasPlugin('typescript'), hasPlugin('jsx')),
-      (code, isExpression) =>
-        (isExpression ? babelParseExpression : babelParse)(code, options),
+      (code, isExpression, offset) =>
+        (isExpression ? babelParseExpression : babelParse)(code, {
+          ...options,
+          startIndex: offset,
+        }),
       factory.build.bind(null, 'babel'),
       factory.isTarget,
     )
@@ -187,11 +205,12 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
       code,
       'espree',
       () => baseParse(code, false, !!options?.ecmaFeatures?.jsx),
-      (code, isExpression) => {
-        const ast = espreeParse(isExpression ? `(${code})` : code, options)
+      (code, isExpression, offset) => {
+        let ast = espreeParse(isExpression ? `(${code})` : code, options)
         if (isExpression) {
           // @ts-expect-error
-          return ast.body[0].expression
+          ast = ast.body[0].expression
+          ast = patchLocOffset(ast, offset! - 1)
         }
         return ast
       },
@@ -205,23 +224,49 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
       code,
       'eslint-typescript',
       (code) => baseParse(code, true, !!options?.jsx),
-      (code, isExpression) => {
+      (code, isExpression, offset) => {
         let ast = tsEslintParse(isExpression ? `(${code})` : code, {
           ...options,
           range: true,
         })
 
-        // @ts-expect-error
-        if (isExpression) ast = ast.body[0].expression
+        if (isExpression) {
+          // @ts-expect-error
+          ast = ast.body[0].expression
+          ast = patchLocOffset(ast, offset! - 1)
+        }
 
         return ast
       },
-      // buildTryOperator,
       factory.build.bind(null, 'eslint-typescript'),
       factory.isTarget,
     )
   }
 
+  function eslintTypescriptParser(
+    src: string | SourceFile,
+    options?: TSESParserOptions | null,
+  ) {
+    const code = typeof src === 'string' ? src : src.text
+    return replace<ReturnType<typeof parseForESLint>>(
+      code,
+      'eslint-typescript-parser',
+      (code) => baseParse(code, true, !!options?.ecmaFeatures?.jsx),
+      (src, isExpression, offset) => {
+        let ast = parseForESLint(isExpression ? `(${src})` : src, options)
+
+        if (isExpression) {
+          // @ts-expect-error
+          ast = ast.ast.body[0].expression
+          ast = patchLocOffset(ast, offset! - 1)
+        }
+
+        return ast
+      },
+      factory.build.bind(null, 'eslint-typescript-parser'),
+      factory.isTarget,
+    )
+  }
   function transform(
     code: string,
     id: string,
@@ -263,6 +308,7 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
     espree,
     eslintTypescript,
   )
+  const eslint = createESLintParser(espree, eslintTypescriptParser)
 
   return {
     baseParse,
@@ -270,8 +316,10 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
     babel,
     espree,
     eslintTypescript,
+    eslintTypescriptParser,
     transform,
     prettier,
+    eslint,
   }
 }
 
@@ -286,6 +334,6 @@ function buildAcornParser(
   } else if (isJSX) {
     parser = parser.extend(acornJsx())
   }
-  parser = customParser?.(Parser) || parser
+  parser = customParser?.(parser) || parser
   return parser
 }
