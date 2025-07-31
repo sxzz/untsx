@@ -55,7 +55,7 @@ export interface UntsxFactory<T = any> {
       }
   isTarget: IsTargetFn
   build: (parserName: string, start: number, end: number, valid: any) => T
-  shouldTransform?: (code: string, id: string) => boolean
+  shouldTransform?: (code: string, id?: string) => boolean
   transform: (
     code: string,
     id: string,
@@ -145,6 +145,10 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
     isJSX?: boolean,
     parser: typeof Parser = Parser,
   ): AcornProgram {
+    if (factory.shouldTransform && !factory.shouldTransform(code)) {
+      return parser.parse(code, options)
+    }
+
     if (factory.baseParser.name === 'acorn') {
       parser = buildAcornParser(
         parser,
@@ -169,6 +173,10 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
   }
 
   function babel(code: string, options?: BabelOptions): ParseResult<File> {
+    if (factory.shouldTransform && !factory.shouldTransform(code)) {
+      return babelParse(code, options)
+    }
+
     if (factory.baseParser.name === 'babel') {
       const { parserOptions } = factory.baseParser
       return babelParse(code, {
@@ -208,6 +216,10 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
   }
 
   function espree(code: string, options?: EspreeOptions): AcornProgram {
+    if (factory.shouldTransform && !factory.shouldTransform(code)) {
+      return espreeParse(code, options)
+    }
+
     return replace<AcornProgram>(
       code,
       'espree',
@@ -227,6 +239,10 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
   }
 
   function eslintTypescript(code: string, options?: TSESTreeOptions) {
+    if (factory.shouldTransform && !factory.shouldTransform(code)) {
+      return tsEslintParse(code, options)
+    }
+
     return replace<TSESTree.Program>(
       code,
       'eslint-typescript',
@@ -255,6 +271,10 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
     options?: TSESParserOptions | null,
   ) {
     const code = typeof src === 'string' ? src : src.text
+    if (factory.shouldTransform && !factory.shouldTransform(code)) {
+      return parseForESLint(code, options)
+    }
+
     return replace<ReturnType<typeof parseForESLint>>(
       code,
       'eslint-typescript-parser',
@@ -274,11 +294,16 @@ export function createUntsx(factory: UntsxFactory): UntsxInstance {
       factory.isTarget,
     )
   }
+
   function transform(
     code: string,
     id: string,
     s: MagicStringAST | Codes,
   ): boolean {
+    if (factory.shouldTransform && !factory.shouldTransform(code, id)) {
+      return false
+    }
+
     const isVolar = Array.isArray(s)
     const ast = baseParse(code, REGEX_TS.test(id), id.endsWith('.jsx'))
 

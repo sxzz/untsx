@@ -31,6 +31,7 @@ const { acorn, babel, espree, eslintTypescript, transform, prettier, eslint } =
         range: [start, end],
       }
     },
+    shouldTransform: (code) => /\btry\b/.test(code),
     transform(code, id, s, node) {
       const argumentStart = node.argument.start
 
