@@ -45,14 +45,8 @@ export { createESLintParser, createPrettierPlugin, replace }
 
 export interface UntsxFactory<T = any> {
   baseParser:
-    | {
-        name: 'acorn'
-        customParser?: CustomAcornParser
-      }
-    | {
-        name: 'babel'
-        parserOptions: BabelOptions
-      }
+    | { name: 'acorn'; customParser?: CustomAcornParser }
+    | { name: 'babel'; parserOptions: BabelOptions }
   isTarget: IsTargetFn
   build: (parserName: string, start: number, end: number, valid: any) => T
   shouldTransform?: (code: string, id?: string) => boolean

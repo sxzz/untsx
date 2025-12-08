@@ -1,32 +1,35 @@
 {
   "name": "untsx",
-  "version": "0.1.2",
-  "packageManager": "pnpm@10.13.1",
-  "description": "Universal TypeScript extension for all popular toolchains.",
   "type": "module",
+  "version": "0.1.2",
+  "packageManager": "pnpm@10.24.0",
+  "description": "Universal TypeScript extension for all popular toolchains.",
+  "author": "Kevin Deng <sxzz@sxzz.moe>",
   "license": "MIT",
+  "funding": "https://github.com/sponsors/sxzz",
   "homepage": "https://github.com/sxzz/untsx#readme",
-  "bugs": {
-    "url": "https://github.com/sxzz/untsx/issues"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sxzz/untsx.git"
   },
-  "author": "Kevin Deng <sxzz@sxzz.moe>",
-  "funding": "https://github.com/sponsors/sxzz",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/sxzz/untsx/issues"
+  },
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=20.19.0"
   },
   "scripts": {
     "lint": "eslint --cache .",
@@ -40,38 +43,35 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@babel/parser": "^7.28.0",
-    "@typescript-eslint/parser": "^8.38.0",
-    "@typescript-eslint/typescript-estree": "^8.38.0",
+    "@babel/parser": "^7.28.5",
+    "@typescript-eslint/parser": "^8.48.1",
+    "@typescript-eslint/typescript-estree": "^8.48.1",
     "acorn": "^8.15.0",
     "acorn-jsx": "^5.3.2",
     "acorn-typescript": "^1.4.13",
     "espree": "^11.0.0",
     "estree-walker": "^3.0.3",
-    "magic-string-ast": "^1.0.0",
-    "prettier": "^3.6.2"
+    "magic-string-ast": "^1.0.3",
+    "prettier": "^3.7.4"
   },
   "devDependencies": {
-    "@babel/types": "^7.28.2",
-    "@sxzz/eslint-config": "^7.1.1",
-    "@sxzz/prettier-config": "^2.2.3",
-    "@sxzz/test-utils": "^0.5.8",
-    "@ts-macro/language-plugin": "^0.3.1",
+    "@babel/types": "^7.28.5",
+    "@sxzz/eslint-config": "^7.4.1",
+    "@sxzz/prettier-config": "^2.2.6",
+    "@sxzz/test-utils": "^0.5.13",
+    "@ts-macro/language-plugin": "^0.3.6",
     "@types/espree": "^10.1.0",
-    "@types/node": "^24.1.0",
-    "bumpp": "^10.2.1",
-    "eslint": "^9.32.0",
-    "prettier": "^3.6.2",
-    "tc39-try": "^0.4.0",
-    "ts-macro": "^0.3.1",
-    "tsdown": "^0.13.0",
-    "tsx": "^4.20.3",
-    "typescript": "^5.8.3",
-    "vite": "^7.0.6",
-    "vitest": "^4.0.3"
-  },
-  "engines": {
-    "node": ">=20.19.0"
+    "@types/node": "^24.10.1",
+    "bumpp": "^10.3.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "tc39-try": "^0.4.3",
+    "ts-macro": "^0.3.6",
+    "tsdown": "^0.17.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7",
+    "vitest": "^4.0.15"
   },
   "prettier": "@sxzz/prettier-config"
 }
