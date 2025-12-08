@@ -1,6 +1,8 @@
-# untsx [![npm](https://img.shields.io/npm/v/untsx.svg)](https://npmjs.com/package/untsx)
+# untsx
 
-[![Unit Test](https://github.com/sxzz/untsx/actions/workflows/unit-test.yml/badge.svg)](https://github.com/sxzz/untsx/actions/workflows/unit-test.yml)
+[![npm version][npm-version-src]][npm-version-href]
+[![npm downloads][npm-downloads-src]][npm-downloads-href]
+[![Unit Test][unit-test-src]][unit-test-href]
 
 Universal TypeScript extension for all popular toolchains.
 
@@ -98,3 +100,12 @@ export default [
 ## License
 
 [MIT](./LICENSE) License © 2025 [Kevin Deng](https://github.com/sxzz)
+
+<!-- Badges -->
+
+[npm-version-src]: https://img.shields.io/npm/v/untsx.svg
+[npm-version-href]: https://npmjs.com/package/untsx
+[npm-downloads-src]: https://img.shields.io/npm/dm/untsx
+[npm-downloads-href]: https://www.npmcharts.com/compare/untsx?interval=30
+[unit-test-src]: https://github.com/sxzz/untsx/actions/workflows/unit-test.yml/badge.svg
+[unit-test-href]: https://github.com/sxzz/untsx/actions/workflows/unit-test.yml
