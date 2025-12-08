@@ -212,7 +212,7 @@ test('magic-string', () => {
   )
 })
 
-test('volar', () => {
+test('volar', async () => {
   const plugin = createPlugin(() => ({
     name: 'test-plugin',
     resolveVirtualCode({ codes, filePath, ast }) {
@@ -220,7 +220,10 @@ test('volar', () => {
     },
   }))
 
-  const program = createTsMacroProgram([path.resolve(`.${fixture}`)], [plugin])
+  const program = await createTsMacroProgram(
+    [path.resolve(`.${fixture}`)],
+    [plugin],
+  )
   const files = program
     .getSourceFiles()
     .filter((file) => !file.fileName.includes('node_modules'))
