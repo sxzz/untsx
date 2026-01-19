@@ -43,36 +43,36 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@babel/parser": "^7.28.5",
-    "@typescript-eslint/parser": "^8.52.0",
-    "@typescript-eslint/typescript-estree": "^8.52.0",
+    "@babel/parser": "^7.28.6",
+    "@typescript-eslint/parser": "^8.53.0",
+    "@typescript-eslint/typescript-estree": "^8.53.0",
     "acorn": "^8.15.0",
     "acorn-jsx": "^5.3.2",
     "acorn-typescript": "^1.4.13",
     "espree": "^11.0.0",
     "estree-walker": "^3.0.3",
     "magic-string-ast": "^1.0.3",
-    "prettier": "^3.7.4"
+    "prettier": "^3.8.0"
   },
   "devDependencies": {
-    "@babel/types": "^7.28.5",
-    "@sxzz/eslint-config": "^7.4.4",
+    "@babel/types": "^7.28.6",
+    "@sxzz/eslint-config": "^7.4.5",
     "@sxzz/prettier-config": "^2.2.6",
     "@sxzz/test-utils": "^0.5.15",
     "@ts-macro/language-plugin": "^0.3.7",
     "@types/espree": "^10.1.0",
-    "@types/node": "^25.0.6",
-    "@typescript/native-preview": "7.0.0-dev.20260111.1",
-    "bumpp": "^10.3.2",
+    "@types/node": "^25.0.9",
+    "@typescript/native-preview": "7.0.0-dev.20260118.1",
+    "bumpp": "^10.4.0",
     "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.0",
     "tc39-try": "^0.4.3",
     "ts-macro": "^0.3.7",
     "tsdown": "^0.19.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.17"
   },
   "prettier": "@sxzz/prettier-config"
 }
