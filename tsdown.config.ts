@@ -1,8 +1,14 @@
-import { defineConfig } from 'tsdown'
+import { lib } from 'tsdown-preset-sxzz'
 
-export default defineConfig({
-  entry: ['./src/index.ts'],
-  platform: 'neutral',
-  exports: true,
-  inlineOnly: [],
-})
+export default lib(
+  {},
+  {
+    external: [
+      // type-only
+      'eslint',
+      'ts-macro',
+      '@babel/types',
+      'typescript',
+    ],
+  },
+)
