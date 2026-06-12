@@ -1,7 +1,7 @@
 {
   "name": "untsx",
   "type": "module",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "packageManager": "pnpm@11.6.0",
   "description": "Universal TypeScript extension for all popular toolchains.",
   "author": "Kevin Deng <sxzz@sxzz.moe>",
