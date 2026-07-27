@@ -59,7 +59,7 @@
     "@ts-macro/language-plugin": "^0.3.7",
     "@types/node": "^25.9.3",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
-    "bumpp": "^11.1.0",
+    "bumpp": "^12.0.0",
     "eslint": "^10.5.0",
     "prettier": "^3.8.4",
     "tc39-try": "^0.5.2",
