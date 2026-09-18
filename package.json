@@ -15,6 +15,7 @@
   "bugs": {
     "url": "https://github.com/sxzz/untsx/issues"
   },
+  "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"
